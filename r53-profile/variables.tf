@@ -46,3 +46,28 @@ variable "cc_aws_organisation_arn" {
 #   description = "Network PHZ Arn"
 #   type        = string
 # }
+
+##################
+## r53-firewall ##
+##################
+variable "domain_list_name" {
+  description = "Name for the domain list"
+  type        = string
+}
+
+variable "domain_file_path" {
+  description = "Path to the domain list text file"
+  type        = string
+}
+
+variable "rule_group_name" {
+  description = "DNS Firewall Rule Group name"
+  type        = string
+}
+
+variable "association_priority" {
+  description = "Priority for rule group association"
+  type        = number
+  default     = 100
+}
+
