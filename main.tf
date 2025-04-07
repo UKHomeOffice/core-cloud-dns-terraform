@@ -9,4 +9,9 @@ module "r53-profile" {
   poise_dns2_ip = var.poise_dns2_ip
   core_cloud_accounts = var.core_cloud_accounts
   cc_aws_organisation_arn = var.cc_aws_organisation_arn
+  ## r53-firewall config
+  domain_list_name       = var.domain_list_name
+  domain_file_path       = var.domain_file_path
+  rule_group_name        = var.rule_group_name
+  association_priority   = var.association_priority
 }
