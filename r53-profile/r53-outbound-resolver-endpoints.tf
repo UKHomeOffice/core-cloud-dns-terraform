@@ -1,9 +1,9 @@
 
 # Create the outbound resolver endpoint
 resource "aws_route53_resolver_endpoint" "outbound" {
- name = "core_cloud_r53_outbound_ep"
- direction = "OUTBOUND"
- security_group_ids = [aws_security_group.resolver_sg.id]
+  name               = "core_cloud_r53_outbound_ep"
+  direction          = "OUTBOUND"
+  security_group_ids = [aws_security_group.resolver_sg.id]
 
   # Use the subnet_ids variable to dynamically assign subnets to the outbound resolver
   dynamic "ip_address" {
@@ -15,7 +15,7 @@ resource "aws_route53_resolver_endpoint" "outbound" {
   tags = merge(
     var.tags,
     {
-      Environment = "prod"
+      Environment  = "prod"
       EndpointType = "outbound"
     }
   )

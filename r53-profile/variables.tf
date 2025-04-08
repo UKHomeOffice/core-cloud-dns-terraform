@@ -20,13 +20,13 @@ variable "poise_domain_name" {
 
 variable "poise_dns1_ip" {
   description = "Poise DNS1 IP"
-  default = "1.2.3.4"
+  default     = "1.2.3.4"
   type        = string
 }
 
 variable "poise_dns2_ip" {
   description = "Poise DNS2 IP"
-  default = "4.5.6.7"
+  default     = "4.5.6.7"
   type        = string
 }
 

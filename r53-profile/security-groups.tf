@@ -26,7 +26,7 @@ resource "aws_security_group" "resolver_sg" {
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"  # All protocols
+    protocol    = "-1"           # All protocols
     cidr_blocks = ["10.0.0.0/8"] # We could change this to actual DNS IPs once known
     description = "Allow Outbound DNS queries over TCP"
   }
