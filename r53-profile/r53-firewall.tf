@@ -49,7 +49,7 @@ locals {
 resource "aws_route53_resolver_firewall_rule" "aws_managed_rules" {
   for_each = local.aws_managed_lists
 
-  name                    = "aws-managed-${each.key}"
+  name                    = "${each.key}"
   action                  = "BLOCK"
   firewall_domain_list_id = each.value
   firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.rule_group.id
