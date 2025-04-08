@@ -5,7 +5,7 @@ resource "aws_route53profiles_profile" "cc_r53_profile" {
     var.tags,
     {
       Environment = "prod"
-      Account = "Network"
+      Account     = "Network"
     }
   )
 
