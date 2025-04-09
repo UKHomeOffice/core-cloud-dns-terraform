@@ -23,7 +23,7 @@ resource "aws_route53_resolver_firewall_rule_group" "rule_group" {
   )
 }
 
-# Add custom rules
+# Add custom rules for - blocked domains
 resource "aws_route53_resolver_firewall_rule" "custom_block_rule" {
   name                    = "cc-custom-block-rule"
   action                  = "BLOCK"
