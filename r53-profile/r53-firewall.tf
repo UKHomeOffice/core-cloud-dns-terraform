@@ -29,7 +29,7 @@ resource "aws_route53_resolver_firewall_rule" "custom_block_rule" {
   action                  = "BLOCK"
   block_response          = "NXDOMAIN"
   firewall_domain_list_id = aws_route53_resolver_firewall_domain_list.custom_blocked_domains.id
-  priority                = 200
+  priority                = var.custom_association_priority
   firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.rule_group.id
 }
 
@@ -52,7 +52,7 @@ resource "aws_route53_resolver_firewall_rule" "aws_managed_rules" {
   action                  = "BLOCK"
   firewall_domain_list_id = each.value
   firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.rule_group.id
-  priority                = var.association_priority + index(keys(local.aws_managed_lists), each.key)
+  priority                = var.aws_association_priority + index(keys(local.aws_managed_lists), each.key)
   block_response          = "NODATA"
 }
 
