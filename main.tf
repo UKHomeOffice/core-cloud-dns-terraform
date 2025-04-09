@@ -13,5 +13,6 @@ module "r53-profile" {
   domain_list_name     = var.domain_list_name
   domain_file_path     = var.domain_file_path
   rule_group_name      = var.rule_group_name
-  association_priority = var.association_priority
+  aws_association_priority = var.aws_association_priority
+  custom_association_priority = var.custom_association_priority
 }
