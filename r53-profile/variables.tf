@@ -65,9 +65,14 @@ variable "rule_group_name" {
   type        = string
 }
 
-variable "association_priority" {
+variable "aws_association_priority" {
   description = "Priority for rule group association"
   type        = number
   default     = 100
 }
 
+variable "custom_association_priority" {
+  description = "Priority for rule group association"
+  type        = number
+  default     = 200
+}

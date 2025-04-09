@@ -23,17 +23,16 @@ resource "aws_route53_resolver_firewall_rule_group" "rule_group" {
   )
 }
 
-# Add custom rules
-resource "aws_route53_resolver_firewall_rule" "custom_block_rules" {
-  for_each = toset(split("\n", file(var.domain_file_path)))
-
-  name                    = replace(each.key, ".", "-")
+# Add custom rules for - blocked domains
+resource "aws_route53_resolver_firewall_rule" "custom_block_rule" {
+  name                    = "cc-custom-block-rule"
   action                  = "BLOCK"
   block_response          = "NXDOMAIN"
   firewall_domain_list_id = aws_route53_resolver_firewall_domain_list.custom_blocked_domains.id
-  priority                = 25 + index(split("\n", file(var.domain_file_path)), each.key) + 1
+  priority                = var.custom_association_priority
   firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.rule_group.id
 }
+
 
 # Add all AWS managed lists
 # fetched from aws console with cli:  aws route53resolver list-firewall-domain-lists --region eu-west-2
@@ -53,7 +52,7 @@ resource "aws_route53_resolver_firewall_rule" "aws_managed_rules" {
   action                  = "BLOCK"
   firewall_domain_list_id = each.value
   firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.rule_group.id
-  priority                = var.association_priority + index(keys(local.aws_managed_lists), each.key)
+  priority                = var.aws_association_priority + index(keys(local.aws_managed_lists), each.key)
   block_response          = "NODATA"
 }
 
