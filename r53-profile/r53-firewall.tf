@@ -29,7 +29,7 @@ resource "aws_route53_resolver_firewall_rule" "custom_block_rule" {
   action                  = "BLOCK"
   block_response          = "NXDOMAIN"
   firewall_domain_list_id = aws_route53_resolver_firewall_domain_list.custom_blocked_domains.id
-  priority                = 201
+  priority                = 200
   firewall_rule_group_id  = aws_route53_resolver_firewall_rule_group.rule_group.id
 }
 
