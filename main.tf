@@ -15,4 +15,5 @@ module "r53-profile" {
   rule_group_name      = var.rule_group_name
   aws_association_priority = var.aws_association_priority
   custom_association_priority = var.custom_association_priority
+  rulegroup_association_priority = var.rulegroup_association_priority
 }
