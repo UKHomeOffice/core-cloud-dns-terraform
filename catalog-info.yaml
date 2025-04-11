@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: core-cloud-dns-terraform
+  description: A repo for Core Cloud DNS Configuration.
+  annotations:
+    github.com/project-slug: UKHomeOffice/core-cloud-dns-terraform
+spec:
+  type: service
+  owner: core-cloud-devops
+  lifecycle: experimental
+  system: core-cloud
