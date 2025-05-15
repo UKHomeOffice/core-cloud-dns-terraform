@@ -1,3 +1,6 @@
+# ---------------------------------------------
+# Local Maps for Resolver Subnet Configuration
+# ---------------------------------------------
 locals {
   poise_map = zipmap(
     range(length(var.poise_resolver_subnet_cidrs)),
@@ -15,6 +18,14 @@ locals {
     }]
   )
 
+  natg_map = zipmap(
+    range(length(var.natg_subnet_cidrs)),
+    [for i in range(length(var.natg_subnet_cidrs)) : {
+      cidr = var.natg_subnet_cidrs[i]
+      az   = var.availability_zones[i]
+    }]
+  )
+
   inbound_map = zipmap(
     range(length(var.inbound_resolver_subnet_cidrs)),
     [for i in range(length(var.inbound_resolver_subnet_cidrs)) : {
@@ -24,10 +35,20 @@ locals {
   )
 }
 
-##############################
-# Create Resolver Subnets
-##############################
+# ------------------------------
+# Internet Gateway for the VPC
+# ------------------------------
+resource "aws_internet_gateway" "igw" {
+  vpc_id = var.vpc_id
 
+  tags = {
+    Name = "${var.vpc_name}-igw"
+  }
+}
+
+# -----------------------------------
+# Resolver Subnets (INBOUND ONLY)
+# -----------------------------------
 resource "aws_subnet" "cc_inbound_endpoint_subnet" {
   for_each = local.inbound_map
 
@@ -41,6 +62,9 @@ resource "aws_subnet" "cc_inbound_endpoint_subnet" {
   }
 }
 
+# -----------------------------------
+# Resolver Subnets (POISE OUTBOUND)
+# -----------------------------------
 resource "aws_subnet" "cc_poise_outbound_endpoint_subnet" {
   for_each = local.poise_map
 
@@ -54,6 +78,9 @@ resource "aws_subnet" "cc_poise_outbound_endpoint_subnet" {
   }
 }
 
+# -----------------------------------
+# Resolver Subnets (NCSC OUTBOUND)
+# -----------------------------------
 resource "aws_subnet" "cc_ncsc_outbound_endpoint_subnet" {
   for_each = local.ncsc_map
 
@@ -67,28 +94,72 @@ resource "aws_subnet" "cc_ncsc_outbound_endpoint_subnet" {
   }
 }
 
+# ------------------------------------------------------
+# Public NAT Gateway and Elastic IPs (NAT GW in public subnet)
+# ------------------------------------------------------
+resource "aws_subnet" "cc_ncsc_natgw_subnet" {
+  for_each = local.natg_map
 
-##############################
-# Private NAT Gateway
-##############################
-
-
-resource "aws_nat_gateway" "private_nat_gw" {
-  for_each          = aws_subnet.cc_ncsc_outbound_endpoint_subnet
-  connectivity_type = "private"
-  subnet_id         = each.value.id
+  vpc_id                  = var.vpc_id
+  cidr_block              = each.value.cidr
+  availability_zone       = each.value.az
+  map_public_ip_on_launch = true
 
   tags = {
-    Name = "private-natgw-${each.key}"
+    Name = "cc-ncsc-natgw-subnet-${each.key}"
   }
 }
 
+resource "aws_eip" "ncsc_natgw_eip" {
+  for_each = aws_subnet.cc_ncsc_natgw_subnet
+  domain   = "vpc"
 
-##############################
-# Route Tables
-##############################
+  tags = {
+    Name = "ncsc-natgw-eip-${each.key}"
+  }
+}
 
+resource "aws_nat_gateway" "ncsc_natgw" {
+  for_each      = aws_subnet.cc_ncsc_natgw_subnet
+  subnet_id     = each.value.id
+  allocation_id = aws_eip.ncsc_natgw_eip[each.key].id
+
+  tags = {
+    Name = "ncsc-natgw-${each.key}"
+  }
+}
+
+# ------------------------------------------------------
+# Public Route Table for NAT Subnet to IGW (NCSC only)
+# ------------------------------------------------------
+resource "aws_route_table" "ncsc_nat_subnet_rt" {
+  for_each = aws_subnet.cc_ncsc_natgw_subnet
+
+  vpc_id = var.vpc_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "ncsc-nat-subnet-rt-${each.key}"
+  }
+}
+
+resource "aws_route_table_association" "ncsc_nat_rt_assoc" {
+  for_each = aws_subnet.cc_ncsc_natgw_subnet
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.ncsc_nat_subnet_rt[each.key].id
+}
+
+# ----------------------------------------------------------
+# Route Tables for Resolver Endpoints (POISE/NCSC/INBOUND)
+# ----------------------------------------------------------
 resource "aws_route_table" "cc_poise_outbound_endpoint_rt" {
+  for_each = aws_subnet.cc_poise_outbound_endpoint_subnet
+
   vpc_id = var.vpc_id
 
   route {
@@ -97,9 +168,10 @@ resource "aws_route_table" "cc_poise_outbound_endpoint_rt" {
   }
 
   tags = {
-    Name = "cc-poise-outbound-resolver-endpoints-rt"
+    Name = "cc-poise-outbound-resolver-endpoints-rt-${each.key}"
   }
 }
+
 
 resource "aws_route_table" "cc_ncsc_outbound_endpoint_rt" {
   for_each = aws_subnet.cc_ncsc_outbound_endpoint_subnet
@@ -108,14 +180,13 @@ resource "aws_route_table" "cc_ncsc_outbound_endpoint_rt" {
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.private_nat_gw[each.key].id
+    nat_gateway_id = aws_nat_gateway.ncsc_natgw[each.key].id
   }
 
   tags = {
     Name = "cc-ncsc-outbound-resolver-endpoints-rt-${each.key}"
   }
 }
-
 
 resource "aws_route_table" "cc_inbound_resolver_rt" {
   vpc_id = var.vpc_id
@@ -130,15 +201,14 @@ resource "aws_route_table" "cc_inbound_resolver_rt" {
   }
 }
 
-##############################
-# Route Table Associations
-##############################
-
+# -----------------------------------------------------
+# Route Table Associations for POISE/NCSC/INBOUND
+# -----------------------------------------------------
 resource "aws_route_table_association" "cc_poise_outbound_endpoint_assoc" {
   for_each = aws_subnet.cc_poise_outbound_endpoint_subnet
 
   subnet_id      = each.value.id
-  route_table_id = aws_route_table.cc_poise_outbound_endpoint_rt.id
+  route_table_id = aws_route_table.cc_poise_outbound_endpoint_rt[each.key].id
 }
 
 resource "aws_route_table_association" "cc_ncsc_outbound_endpoint_assoc" {
@@ -147,7 +217,6 @@ resource "aws_route_table_association" "cc_ncsc_outbound_endpoint_assoc" {
   subnet_id      = each.value.id
   route_table_id = aws_route_table.cc_ncsc_outbound_endpoint_rt[each.key].id
 }
-
 
 resource "aws_route_table_association" "cc_inbound_resolver_assoc" {
   for_each = aws_subnet.cc_inbound_endpoint_subnet
