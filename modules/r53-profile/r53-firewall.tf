@@ -73,4 +73,9 @@ resource "aws_route53_resolver_firewall_rule_group_association" "assoc" {
   )
 }
 
-
+# Associate a DNS Firewall Rule Group with the route53 Profile
+resource "aws_route53profiles_resource_association" "firewall_rule_group" {
+  profile_id = aws_route53profiles_profile.cc_r53_profile.id
+  resource_arn = aws_route53_resolver_firewall_rule_group.rule_group.arn
+  resource_type = "DNS_FIREWALL_RULE_GROUP"
+}
