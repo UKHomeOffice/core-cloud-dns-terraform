@@ -23,6 +23,7 @@ resource "aws_route53_zone" "private_zone" {
     {
       Environment = var.environment
     },
-    var.tags
+    var.tags,
+    var.vpc_ids
   )
 }

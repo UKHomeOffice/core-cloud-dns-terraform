@@ -7,11 +7,6 @@ variable "vpc_ids" {
   ]
 }
 
-variable "vpc_id" {
-  type    = string
-  default = "vpc-abc123"
-}
-
 variable "domain_name" {
   description = "The domain name for the Route 53 private hosted zone"
   type        = string
