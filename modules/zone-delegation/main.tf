@@ -4,6 +4,5 @@ resource "aws_route53_record" "ns_record" {
   name    = var.domain_name
   type    = "NS"
   ttl     = 300
-
   records = var.workload_public_zone_ns_records
 }

@@ -8,8 +8,6 @@ variable "environment" {
   type        = string
 }
 
-
-
 variable "tags" {
   description = "Additional tags to be applied to the hosted zone"
   type        = map(string)
