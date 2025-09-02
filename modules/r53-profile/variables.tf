@@ -8,6 +8,12 @@ variable "tags" {
   description = "Tags to apply to AWS resources"
 }
 
+
+variable "vpc_name" {
+  description = "VPC Name"
+  type        = string
+}
+
 variable "vpc_id" {
   description = "VPC ID of the network account where the Route 53 profile will be associated"
   type        = string
@@ -103,6 +109,11 @@ variable "poise_resolver_subnet_cidrs" {
 }
 
 variable "ncsc_resolver_subnet_cidrs" {
+  type        = list(string)
+  description = "List of CIDRs for NCSC outbound resolver subnets"
+}
+
+variable "natg_subnet_cidrs" {
   type        = list(string)
   description = "List of CIDRs for NCSC outbound resolver subnets"
 }
