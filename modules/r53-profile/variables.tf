@@ -51,7 +51,7 @@ variable "ncsc_dns2_ip" {
 
 
 
-variable "cc_aws_organisation_arn" {
+variable "cc_aws_orgnisation_arn" {
   description = "Core Cloud AWS Org ARN"
   type        = string
 }
@@ -98,10 +98,39 @@ variable "rulegroup_association_priority" {
 # Routing
 ######
 
-variable "transit_gateway_id" {
-  type        = string
-  description = "Transit Gateway ID"
+variable "prod_cidrs" {
+  description = "List of CIDRs reachable via the PROD Transit Gateway"
+  type        = list(string)
+  default     = []
 }
+
+variable "notprod_cidrs" {
+  description = "List of CIDRs reachable via the NOTPROD Transit Gateway"
+  type        = list(string)
+  default     = []
+}
+
+variable "central_cidrs" {
+  description = "List of CIDRs reachable via the CENTRAL Transit Gateway"
+  type        = list(string)
+  default     = []
+}
+
+variable "prod_transit_gateway_id" {
+  description = "Transit Gateway ID for PROD (e.g., tgw-xxxxxxxxxxxxxxxxx)"
+  type        = string
+}
+
+variable "notprod_transit_gateway_id" {
+  description = "Transit Gateway ID for NOTPROD"
+  type        = string
+}
+
+variable "central_transit_gateway_id" {
+  description = "Transit Gateway ID for CENTRAL"
+  type        = string
+}
+
 
 variable "poise_resolver_subnet_cidrs" {
   type        = list(string)
