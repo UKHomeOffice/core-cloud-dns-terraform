@@ -8,7 +8,7 @@ resource "aws_ram_resource_share" "cc_r53_profile_share" {
 
 # Share with AWS Organization
 resource "aws_ram_principal_association" "cc_org_association" {
-  principal          = var.cc_aws_organisation_arn
+  principal          = var.cc_aws_orgnisation_arn
   resource_share_arn = aws_ram_resource_share.cc_r53_profile_share.arn
 }
 
