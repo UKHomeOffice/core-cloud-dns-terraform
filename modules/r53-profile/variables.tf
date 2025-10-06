@@ -20,35 +20,25 @@ variable "vpc_id" {
 }
 
 
-variable "poise_domain_name" {
-  description = "Poise Domain Name"
-  type        = string
+variable "poise_domain_names" {
+  type = list(string)
+  # example:
+  # default = ["poise.homeoffice.local", "immigrationservices.phz"]
 }
 
-variable "poise_dns1_ip" {
-  description = "Poise DNS1 IP"
-  default     = "1.2.3.4"
-  type        = string
+variable "poise_dns_ips" {
+  type = list(string)
+  # example:
+  # default = ["10.228.8.69", "10.228.9.69"]
 }
 
-variable "poise_dns2_ip" {
-  description = "Poise DNS2 IP"
-  default     = "4.5.6.7"
-  type        = string
-}
 
-variable "ncsc_dns1_ip" {
-  description = "NCSC DNS1 IP"
-  default     = "1.2.3.4"
-  type        = string
+variable "ncsc_dns_ips" {
+  description = "List of NCSC PDNS IP addresses"
+  type        = list(string)
+  # example:
+  # default = ["10.228.10.10", "10.228.11.10"]
 }
-
-variable "ncsc_dns2_ip" {
-  description = "NCSC DNS2 IP"
-  default     = "4.5.6.7"
-  type        = string
-}
-
 
 
 variable "cc_aws_orgnisation_arn" {
@@ -155,4 +145,8 @@ variable "inbound_resolver_subnet_cidrs" {
 variable "availability_zones" {
   type        = list(string)
   description = "List of availability zones"
+}
+
+variable "r53_ram_share_permission_arns" {
+  type        = list(string)
 }
