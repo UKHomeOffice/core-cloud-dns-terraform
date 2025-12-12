@@ -4,24 +4,30 @@
 
 resource "aws_security_group" "cc_poise_resolver_sg" {
   name        = "cc-poise-resolver-sg"
-  description = "SG for Poise outbound resolver DNS traffic"
+  description = "Security Group for Poise outbound resolver DNS traffic"
   vpc_id      = var.vpc_id
 
-  # Allow outbound DNS to Poise DNS IPs
-  egress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
-    cidr_blocks = ["${var.poise_dns1_ip}/32", "${var.poise_dns2_ip}/32"]
-    description = "Allow outbound DNS queries to Poise over UDP"
+  # Allow outbound DNS (UDP + TCP) to each Poise DNS IP
+  dynamic "egress" {
+    for_each = var.poise_dns_ips
+    content {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "udp"
+      cidr_blocks = ["${egress.value}/32"]
+      description = "Allow outbound DNS (UDP) to Poise DNS ${egress.value}"
+    }
   }
 
-  egress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "tcp"
-    cidr_blocks = ["${var.poise_dns1_ip}/32", "${var.poise_dns2_ip}/32"]
-    description = "Allow outbound DNS queries to Poise over TCP"
+  dynamic "egress" {
+    for_each = var.poise_dns_ips
+    content {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "tcp"
+      cidr_blocks = ["${egress.value}/32"]
+      description = "Allow outbound DNS (TCP) to Poise DNS ${egress.value}"
+    }
   }
 }
 
@@ -31,26 +37,33 @@ resource "aws_security_group" "cc_poise_resolver_sg" {
 
 resource "aws_security_group" "cc_ncsc_resolver_sg" {
   name        = "cc-ncsc-resolver-sg"
-  description = "SG for NCSC outbound resolver DNS traffic"
+  description = "Security Group for NCSC outbound resolver DNS traffic"
   vpc_id      = var.vpc_id
 
-  # Allow outbound DNS to NCSC DNS IPs
-  egress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
-    cidr_blocks = ["${var.ncsc_dns1_ip}/32", "${var.ncsc_dns2_ip}/32"]
-    description = "Allow outbound DNS queries to NCSC PDNS over UDP"
+  # Allow outbound DNS (UDP + TCP) to each NCSC DNS IP
+  dynamic "egress" {
+    for_each = var.ncsc_dns_ips
+    content {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "udp"
+      cidr_blocks = ["${egress.value}/32"]
+      description = "Allow outbound DNS (UDP) to NCSC PDNS ${egress.value}"
+    }
   }
 
-  egress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "tcp"
-    cidr_blocks = ["${var.ncsc_dns1_ip}/32", "${var.ncsc_dns2_ip}/32"]
-    description = "Allow outbound DNS queries to NCSC PDNS over TCP"
+  dynamic "egress" {
+    for_each = var.ncsc_dns_ips
+    content {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "tcp"
+      cidr_blocks = ["${egress.value}/32"]
+      description = "Allow outbound DNS (TCP) to NCSC PDNS ${egress.value}"
+    }
   }
 }
+
 
 ##############################
 # Inbound Resolver SG
