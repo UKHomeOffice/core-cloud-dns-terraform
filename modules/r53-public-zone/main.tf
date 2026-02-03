@@ -1,10 +1,11 @@
+
 resource "aws_route53_zone" "workload_zone" {
-  name = var.domain_name
+  for_each = toset(var.domain_names)
+
+  name = each.value
 
   tags = merge(
-    {
-      Environment = var.environment
-    },
+    { Environment = var.environment },
     var.tags
   )
 }
