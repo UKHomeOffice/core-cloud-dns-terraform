@@ -32,6 +32,15 @@ variable "poise_dns_ips" {
   # default = ["10.228.8.69", "10.228.9.69"]
 }
 
+variable "ebsa_domain_names" {
+  type = list(string)
+}
+
+variable "ebsa_dns_ips" {
+  type = list(string)
+  # example:
+  # default = ["10.228.8.69", "10.228.9.69"]
+}
 
 variable "ncsc_dns_ips" {
   description = "List of NCSC PDNS IP addresses"
