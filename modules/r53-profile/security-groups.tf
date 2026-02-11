@@ -1,13 +1,18 @@
 ##############################
-# Poise Outbound Resolver SG
+# Outbound Resolver SG (Poise + EBSA)
 ##############################
 
 resource "aws_security_group" "cc_poise_resolver_sg" {
   name        = "cc-poise-resolver-sg"
-  description = "Security Group for Poise outbound resolver DNS traffic"
-  vpc_id      = var.vpc_id
 
-  # Allow outbound DNS (UDP + TCP) to each Poise DNS IP
+  # MUST stay EXACTLY the same or AWS forces replacement
+  description = "Security Group for Poise outbound resolver DNS traffic"
+
+  vpc_id = var.vpc_id
+
+  # -----------------
+  # Poise DNS
+  # -----------------
   dynamic "egress" {
     for_each = var.poise_dns_ips
     content {
@@ -29,7 +34,33 @@ resource "aws_security_group" "cc_poise_resolver_sg" {
       description = "Allow outbound DNS (TCP) to Poise DNS ${egress.value}"
     }
   }
+
+  # -----------------
+  # EBSA DNS
+  # -----------------
+  dynamic "egress" {
+    for_each = var.ebsa_dns_ips
+    content {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "udp"
+      cidr_blocks = ["${egress.value}/32"]
+      description = "Allow outbound DNS (UDP) to EBSA DNS ${egress.value}"
+    }
+  }
+
+  dynamic "egress" {
+    for_each = var.ebsa_dns_ips
+    content {
+      from_port   = 53
+      to_port     = 53
+      protocol    = "tcp"
+      cidr_blocks = ["${egress.value}/32"]
+      description = "Allow outbound DNS (TCP) to EBSA DNS ${egress.value}"
+    }
+  }
 }
+
 
 ##############################
 # NCSC Outbound Resolver SG
