@@ -13,3 +13,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_dnssec" {
+  type        = bool
+  default     = false
+  description = "Enable Route53 DNSSEC signing"
+}
