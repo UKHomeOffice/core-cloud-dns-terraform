@@ -16,7 +16,14 @@ resource "aws_acm_certificate" "wildcard" {
     create_before_destroy = true
   }
 
-  tags        = var.tags
+  tags = merge(
+    var.tags,
+    {
+      Environment = "prod"
+      Account     = "Network"
+      Component   = "internal-dns-cert"
+    }
+  )
 }
 
 # Create DNS validation record in the PUBLIC hosted zone
